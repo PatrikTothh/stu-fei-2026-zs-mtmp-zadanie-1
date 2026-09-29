@@ -14,11 +14,17 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.pow
 
-class MainActivity : AppCompatActivity() {
+class CalculateTrajectory : AppCompatActivity() {
+    private lateinit var editTextInitialVelocity: EditText
+    private lateinit var editTextAngle: EditText
+    private lateinit var buttonCalculate: Button
+    private lateinit var buttonList: Button
+    private val trajectoryPointsParcel = ArrayList<TrajectoryPointParcel>()
+    private val GRAVITY = 9.81
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_calculate_trajectory)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
