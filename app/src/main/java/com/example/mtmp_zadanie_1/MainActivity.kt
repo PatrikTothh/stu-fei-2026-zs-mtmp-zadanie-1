@@ -15,6 +15,9 @@ import kotlin.math.sin
 import kotlin.math.pow
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var btnStart: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -24,5 +27,13 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        btnStart = findViewById(R.id.btnStart)
+
+        btnStart.setOnClickListener {
+            val intent = Intent(this, CalculateTrajectory::class.java)
+            startActivity(intent)
+        }
+
     }
 }
