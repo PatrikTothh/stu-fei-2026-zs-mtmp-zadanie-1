@@ -72,11 +72,29 @@ class CalculateTrajectory : AppCompatActivity() {
         }
 
         buttonAnimation.setOnClickListener {
-            Toast.makeText(
-                this,
-                "Animation will be implemented later",
-                Toast.LENGTH_SHORT
-            ).show()
+
+            if (trajectoryPointsParcel.isNotEmpty()) {
+
+                val intent = Intent(
+                    this,
+                    TrajectoryAnimationActivity::class.java
+                )
+
+                intent.putParcelableArrayListExtra(
+                    "trajectory_data",
+                    trajectoryPointsParcel
+                )
+
+                startActivity(intent)
+
+            } else {
+
+                Toast.makeText(
+                    this,
+                    "Calculate trajectory first to see the animation",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 

@@ -32,6 +32,10 @@
         <activity
             android:name=".TrajectoryGraphActivity"
             android:exported="false" />
+        <activity
+            android:name=".TrajectoryAnimationActivity"
+            android:exported="false"
+            android:screenOrientation="unspecified" />
     </application>
 
 </manifest>
