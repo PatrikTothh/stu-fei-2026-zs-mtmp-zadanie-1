@@ -1,5 +1,8 @@
 package com.example.mtmp_zadanie_1
 
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
@@ -14,7 +17,30 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_trajectory_animation)
+
+        val main = findViewById<android.view.View>(R.id.main)
+
+        ViewCompat.setOnApplyWindowInsetsListener(main) { view, insets ->
+            val systemBars =
+                insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+
+            insets
+        }
+
+        animationView = findViewById(R.id.animationView)
+        buttonPlay = findViewById(R.id.buttonPlay)
+        buttonRestart = findViewById(R.id.buttonRestart)
+
+        // rest of your existing code...
 
         animationView = findViewById(R.id.animationView)
         buttonPlay = findViewById(R.id.buttonPlay)

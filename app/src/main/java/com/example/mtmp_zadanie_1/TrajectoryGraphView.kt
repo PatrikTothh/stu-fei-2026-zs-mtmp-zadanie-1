@@ -50,7 +50,7 @@ class TrajectoryGraphView(
         canvas.drawColor(0xFFFFFFFF.toInt())
 
         val leftMargin = 80f
-        val bottomMargin = 80f
+        val bottomMargin = 120f
         val topMargin = 40f
         val rightMargin = 40f
 
