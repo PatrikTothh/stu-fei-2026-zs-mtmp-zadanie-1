@@ -18,6 +18,8 @@ class CalculateTrajectory : AppCompatActivity() {
     private lateinit var editTextAngle: EditText
     private lateinit var buttonCalculate: Button
     private lateinit var buttonList: Button
+    private lateinit var buttonGraph: Button
+    private lateinit var buttonAnimation: Button
     private val trajectoryPointsParcel = ArrayList<TrajectoryPointParcel>()
     private val GRAVITY = 9.81
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +36,8 @@ class CalculateTrajectory : AppCompatActivity() {
         editTextAngle = findViewById(R.id.editTextAngle)
         buttonCalculate = findViewById(R.id.buttonCalculate)
         buttonList = findViewById(R.id.buttonList)
+        buttonGraph = findViewById(R.id.buttonGraph)
+        buttonAnimation = findViewById(R.id.buttonAnimation)
 
         buttonCalculate.setOnClickListener {
             calculateTrajectory()
@@ -49,6 +53,30 @@ class CalculateTrajectory : AppCompatActivity() {
                 Toast.makeText(this,"Calculate trajectory first to see the list",
                     Toast.LENGTH_SHORT).show()
             }
+        }
+        buttonGraph.setOnClickListener {
+            if (trajectoryPointsParcel.isNotEmpty()) {
+                val intent = Intent(this, TrajectoryGraphActivity::class.java)
+                intent.putParcelableArrayListExtra(
+                    "trajectory_data",
+                    trajectoryPointsParcel
+                )
+                startActivity(intent)
+            } else {
+                Toast.makeText(
+                    this,
+                    "Calculate trajectory first to see the graph",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        buttonAnimation.setOnClickListener {
+            Toast.makeText(
+                this,
+                "Animation will be implemented later",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

@@ -29,6 +29,9 @@
             android:name=".TrajectoryListActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".TrajectoryGraphActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
