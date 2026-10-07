@@ -36,7 +36,7 @@ class TrajectoryGraphView(
 
     private val textPaint = Paint().apply {
         color = 0xFF000000.toInt()
-        textSize = 30f
+        textSize = 60f
         isAntiAlias = true
     }
 
@@ -50,7 +50,7 @@ class TrajectoryGraphView(
         canvas.drawColor(0xFFFFFFFF.toInt())
 
         val leftMargin = 80f
-        val bottomMargin = 120f
+        val bottomMargin = 180f
         val topMargin = 40f
         val rightMargin = 40f
 
@@ -142,7 +142,7 @@ class TrajectoryGraphView(
 
                 canvas.drawText(
                     y.toInt().toString(),
-                    leftMargin - 35f,
+                    leftMargin - 65f,
                     screenY + 10f,
                     textPaint
                 )

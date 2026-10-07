@@ -44,7 +44,7 @@ class TrajectoryAnimationView @JvmOverloads constructor(
 
     private val textPaint = Paint().apply {
         color = 0xFF000000.toInt()
-        textSize = 30f
+        textSize = 60f
         isAntiAlias = true
     }
 
@@ -140,7 +140,7 @@ class TrajectoryAnimationView @JvmOverloads constructor(
             if (y > 0 && y % yLabelStep < 0.001) {
                 canvas.drawText(
                     y.toInt().toString(),
-                    leftMargin - 35f,
+                    leftMargin - 65f,
                     screenY + 10f,
                     textPaint
                 )

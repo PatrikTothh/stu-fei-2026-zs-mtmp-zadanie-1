@@ -22,10 +22,12 @@
 
     <ListView
         android:id="@+id/listViewTrajectory"
-        android:layout_width="587dp"
-        android:layout_height="890dp"
+        android:layout_width="308dp"
+        android:layout_height="795dp"
         android:layout_below="@id/textViewListHeader"
+        android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewListHeader" />
 
