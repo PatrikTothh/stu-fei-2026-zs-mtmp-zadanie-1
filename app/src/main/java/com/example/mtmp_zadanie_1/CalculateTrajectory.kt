@@ -1,31 +1,26 @@
 package com.example.mtmp_zadanie_1
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.pow
-
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
 
 class CalculateTrajectory : AppCompatActivity() {
     private lateinit var editTextInitialVelocity: EditText
@@ -262,64 +257,6 @@ class CalculateTrajectory : AppCompatActivity() {
                     "Server error: ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
-            }
-        }
-    }
-    private fun testServerConnection() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val connectivityManager =
-                    getSystemService(ConnectivityManager::class.java)
-
-                val network = connectivityManager.activeNetwork
-
-                val capabilities =
-                    connectivityManager.getNetworkCapabilities(network)
-
-                val hasInternet =
-                    capabilities?.hasCapability(
-                        NetworkCapabilities.NET_CAPABILITY_INTERNET
-                    ) == true
-
-                val hasValidated =
-                    capabilities?.hasCapability(
-                        NetworkCapabilities.NET_CAPABILITY_VALIDATED
-                    ) == true
-
-                val hasWifi =
-                    capabilities?.hasTransport(
-                        NetworkCapabilities.TRANSPORT_WIFI
-                    ) == true
-
-                val hasCellular =
-                    capabilities?.hasTransport(
-                        NetworkCapabilities.TRANSPORT_CELLULAR
-                    ) == true
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@CalculateTrajectory,
-                        """
-                    Network: $network
-                    INTERNET: $hasInternet
-                    VALIDATED: $hasValidated
-                    WIFI: $hasWifi
-                    CELLULAR: $hasCellular
-                    """.trimIndent(),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@CalculateTrajectory,
-                        "ERROR: ${e.javaClass.simpleName}: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-                Log.e("NETWORK_TEST", "Network check failed", e)
             }
         }
     }

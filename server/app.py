@@ -37,8 +37,6 @@ def calculate_trajectory():
 
     print(">>> received data:", data)
     
-    data = request.get_json()
-
     initial_velocity = data.get("initial_velocity")
     angle_degrees = data.get("angle")
 

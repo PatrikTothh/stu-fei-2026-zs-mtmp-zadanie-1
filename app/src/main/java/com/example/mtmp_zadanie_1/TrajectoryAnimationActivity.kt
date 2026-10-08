@@ -40,12 +40,6 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
         buttonPlay = findViewById(R.id.buttonPlay)
         buttonRestart = findViewById(R.id.buttonRestart)
 
-        // rest of your existing code...
-
-        animationView = findViewById(R.id.animationView)
-        buttonPlay = findViewById(R.id.buttonPlay)
-        buttonRestart = findViewById(R.id.buttonRestart)
-
         val trajectoryPoints: ArrayList<TrajectoryPointParcel>? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableArrayListExtra(
