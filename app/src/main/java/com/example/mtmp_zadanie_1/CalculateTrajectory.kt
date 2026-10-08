@@ -13,6 +13,20 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.pow
 
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.util.Log
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
 class CalculateTrajectory : AppCompatActivity() {
     private lateinit var editTextInitialVelocity: EditText
     private lateinit var editTextAngle: EditText
@@ -39,8 +53,16 @@ class CalculateTrajectory : AppCompatActivity() {
         buttonGraph = findViewById(R.id.buttonGraph)
         buttonAnimation = findViewById(R.id.buttonAnimation)
 
+        requestLocalNetworkPermission()
+
         buttonCalculate.setOnClickListener {
-            calculateTrajectory()
+            Toast.makeText(
+                this,
+                "Calculate button works",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            calculateFromServer()
         }
 
         buttonList.setOnClickListener {
@@ -166,4 +188,155 @@ class CalculateTrajectory : AppCompatActivity() {
         Toast.makeText(this, "Calculation performed. ${trajectoryPointsParcel.size} points " +
                 "generated. Click 'List data' to view.", Toast.LENGTH_SHORT).show()
     }
+    private fun calculateFromServer() {
+
+        val velocity = editTextInitialVelocity.text.toString().toDoubleOrNull()
+        val angle = editTextAngle.text.toString().toDoubleOrNull()
+
+        if (velocity == null || angle == null) {
+            Toast.makeText(
+                this,
+                "Enter valid velocity and angle",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        if (velocity <= 0 || angle <= 0 || angle >= 90) {
+            Toast.makeText(
+                this,
+                "Velocity must be > 0 and angle must be between 0 and 90",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        lifecycleScope.launch {
+
+            try {
+
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.api.calculateTrajectory(
+                        TrajectoryRequest(
+                            initial_velocity = velocity,
+                            angle = angle
+                        )
+                    )
+                }
+
+                if (response.success && response.points != null) {
+
+                    trajectoryPointsParcel.clear()
+
+                    trajectoryPointsParcel.addAll(
+                        response.points.map {
+                            TrajectoryPointParcel(
+                                time = it.time,
+                                x = it.x,
+                                y = it.y
+                            )
+                        }
+                    )
+
+                    Toast.makeText(
+                        this@CalculateTrajectory,
+                        "Received ${trajectoryPointsParcel.size} points from server",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                } else {
+
+                    Toast.makeText(
+                        this@CalculateTrajectory,
+                        "Server returned an error",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+
+                Log.e("SERVER", "Request failed", e)
+
+                Toast.makeText(
+                    this@CalculateTrajectory,
+                    "Server error: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+    private fun testServerConnection() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val connectivityManager =
+                    getSystemService(ConnectivityManager::class.java)
+
+                val network = connectivityManager.activeNetwork
+
+                val capabilities =
+                    connectivityManager.getNetworkCapabilities(network)
+
+                val hasInternet =
+                    capabilities?.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_INTERNET
+                    ) == true
+
+                val hasValidated =
+                    capabilities?.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_VALIDATED
+                    ) == true
+
+                val hasWifi =
+                    capabilities?.hasTransport(
+                        NetworkCapabilities.TRANSPORT_WIFI
+                    ) == true
+
+                val hasCellular =
+                    capabilities?.hasTransport(
+                        NetworkCapabilities.TRANSPORT_CELLULAR
+                    ) == true
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@CalculateTrajectory,
+                        """
+                    Network: $network
+                    INTERNET: $hasInternet
+                    VALIDATED: $hasValidated
+                    WIFI: $hasWifi
+                    CELLULAR: $hasCellular
+                    """.trimIndent(),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@CalculateTrajectory,
+                        "ERROR: ${e.javaClass.simpleName}: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                Log.e("NETWORK_TEST", "Network check failed", e)
+            }
+        }
+    }
+
+    private fun requestLocalNetworkPermission() {
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_LOCAL_NETWORK
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_LOCAL_NETWORK),
+                100
+            )
+        }
+    }
+
 }
