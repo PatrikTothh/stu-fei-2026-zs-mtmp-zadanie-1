@@ -8,6 +8,11 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.LinearInterpolator
+import java.util.Locale
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.max
+import kotlin.math.pow
 
 class TrajectoryAnimationView @JvmOverloads constructor(
     context: Context,
@@ -19,37 +24,48 @@ class TrajectoryAnimationView @JvmOverloads constructor(
     private var animator: ValueAnimator? = null
     private var currentPointIndex = 0
 
-    private val gridPaint = Paint().apply {
+    // Convert dp to pixels for consistent sizing across devices.
+    private fun dp(value: Float): Float {
+        return value * resources.displayMetrics.density
+    }
+
+    private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFFE0E0E0.toInt()
-        strokeWidth = 1f
+        strokeWidth = dp(1f)
     }
 
-    private val axisPaint = Paint().apply {
+    private val axisPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF000000.toInt()
-        strokeWidth = 3f
+        strokeWidth = dp(2f)
     }
 
-    private val trajectoryPaint = Paint().apply {
+    private val trajectoryPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF1565C0.toInt()
-        strokeWidth = 5f
+        strokeWidth = dp(3f)
         style = Paint.Style.STROKE
-        isAntiAlias = true
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
     }
 
-    private val pointPaint = Paint().apply {
+    private val pointPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFFD32F2F.toInt()
         style = Paint.Style.FILL
-        isAntiAlias = true
     }
 
-    private val textPaint = Paint().apply {
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF000000.toInt()
-        textSize = 60f
-        isAntiAlias = true
+        textSize = dp(14f)
+    }
+
+    private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF000000.toInt()
+        textSize = dp(20f)
+        textAlign = Paint.Align.CENTER
     }
 
     fun setTrajectory(points: ArrayList<TrajectoryPointParcel>) {
-        trajectoryPoints = points
+        stopAnimation()
+        trajectoryPoints = ArrayList(points)
         currentPointIndex = 0
         invalidate()
     }
@@ -57,99 +73,119 @@ class TrajectoryAnimationView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+        // Draw a white background.
+        canvas.drawColor(0xFFFFFFFF.toInt())
+
         if (trajectoryPoints.isEmpty()) {
+            canvas.drawText(
+                "No trajectory data",
+                width / 2f,
+                height / 2f,
+                titlePaint
+            )
             return
         }
 
-        canvas.drawColor(0xFFFFFFFF.toInt())
-
-        val leftMargin = 80f
-        val bottomMargin = 120f
-        val topMargin = 40f
-        val rightMargin = 40f
+        // Define margins around the graph.
+        val leftMargin = dp(65f)
+        val rightMargin = dp(25f)
+        val topMargin = dp(65f)
+        val bottomMargin = dp(100f)
 
         val graphWidth = width - leftMargin - rightMargin
         val graphHeight = height - topMargin - bottomMargin
 
-        val maxX = trajectoryPoints.maxOf { it.x }
-        val maxY = trajectoryPoints.maxOf { it.y }
+        if (graphWidth <= 0f || graphHeight <= 0f) return
 
-        if (maxX <= 0.0 || maxY <= 0.0) {
-            return
-        }
+        // Calculate the maximum horizontal and vertical positions.
+        val maxX = max(
+            trajectoryPoints.maxOf { it.x },
+            0.1
+        ) * 1.05
 
-        val xScale =
-            graphWidth / (maxX * 1.1).toFloat()
+        val maxY = max(
+            trajectoryPoints.maxOf { it.y },
+            0.1
+        ) * 1.10
 
-        val yScale =
-            graphHeight / (maxY * 1.1).toFloat()
+        // Use equal scaling to preserve the trajectory's physical shape.
+        val pixelsPerMeter = minOf(
+            graphWidth / maxX.toFloat(),
+            graphHeight / maxY.toFloat()
+        )
 
-        val pixelsPerMeter = minOf(xScale, yScale)
+        if (pixelsPerMeter <= 0f) return
 
         val graphMaxX = graphWidth / pixelsPerMeter
         val graphMaxY = graphHeight / pixelsPerMeter
 
-        val xLabelStep = calculateLabelStep(graphMaxX)
-        val yLabelStep = calculateLabelStep(graphMaxY)
+        // Convert trajectory coordinates into screen coordinates.
+        fun screenX(x: Double): Float {
+            return leftMargin + (x * pixelsPerMeter).toFloat()
+        }
 
-        // Grid
+        fun screenY(y: Double): Float {
+            return height - bottomMargin -
+                    (y * pixelsPerMeter).toFloat()
+        }
+
+        // Calculate readable grid intervals.
+        val xStep = calculateStep(graphMaxX.toDouble())
+        val yStep = calculateStep(graphMaxY.toDouble())
+
+        // Draw vertical grid lines and horizontal-position labels.
         var x = 0.0
 
-        while (x <= graphMaxX) {
-
-            val screenX =
-                leftMargin +
-                        (x * pixelsPerMeter).toFloat()
+        while (x <= graphMaxX + xStep * 0.001) {
+            val px = screenX(x)
 
             canvas.drawLine(
-                screenX,
+                px,
                 topMargin,
-                screenX,
+                px,
                 height - bottomMargin,
                 gridPaint
             )
 
-            if (x % xLabelStep < 0.001) {
-                canvas.drawText(
-                    x.toInt().toString(),
-                    screenX - 8f,
-                    height - bottomMargin + 35f,
-                    textPaint
-                )
-            }
+            textPaint.textAlign = Paint.Align.CENTER
 
-            x += 1.0
+            canvas.drawText(
+                formatAxisNumber(x),
+                px,
+                height - bottomMargin + dp(20f),
+                textPaint
+            )
+
+            x += xStep
         }
 
+        // Draw horizontal grid lines and vertical-position labels.
         var y = 0.0
 
-        while (y <= graphMaxY) {
-
-            val screenY =
-                height - bottomMargin -
-                        (y * pixelsPerMeter).toFloat()
+        while (y <= graphMaxY + yStep * 0.001) {
+            val py = screenY(y)
 
             canvas.drawLine(
                 leftMargin,
-                screenY,
+                py,
                 width - rightMargin,
-                screenY,
+                py,
                 gridPaint
             )
 
-            if (y > 0 && y % yLabelStep < 0.001) {
-                canvas.drawText(
-                    y.toInt().toString(),
-                    leftMargin - 65f,
-                    screenY + 10f,
-                    textPaint
-                )
-            }
+            textPaint.textAlign = Paint.Align.RIGHT
 
-            y += 1.0
+            canvas.drawText(
+                formatAxisNumber(y),
+                leftMargin - dp(10f),
+                py + dp(5f),
+                textPaint
+            )
+
+            y += yStep
         }
 
-        // Axes
+        // Draw the horizontal and vertical axes.
         canvas.drawLine(
             leftMargin,
             height - bottomMargin,
@@ -166,76 +202,99 @@ class TrajectoryAnimationView @JvmOverloads constructor(
             axisPaint
         )
 
-        // Draw trajectory behind projectile
+        // Draw the trajectory completed by the projectile so far.
+        val lastIndex = currentPointIndex.coerceIn(
+            0,
+            trajectoryPoints.lastIndex
+        )
+
         val path = Path()
 
-        val lastIndex =
-            currentPointIndex.coerceAtMost(trajectoryPoints.size - 1)
+        for (index in 0..lastIndex) {
+            val point = trajectoryPoints[index]
+            val px = screenX(point.x)
+            val py = screenY(point.y)
 
-        for (i in 0..lastIndex) {
-
-            val point = trajectoryPoints[i]
-
-            val screenX =
-                leftMargin +
-                        (point.x * pixelsPerMeter).toFloat()
-
-            val screenY =
-                height - bottomMargin -
-                        (point.y * pixelsPerMeter).toFloat()
-
-            if (i == 0) {
-                path.moveTo(screenX, screenY)
+            if (index == 0) {
+                path.moveTo(px, py)
             } else {
-                path.lineTo(screenX, screenY)
+                path.lineTo(px, py)
             }
         }
 
         canvas.drawPath(path, trajectoryPaint)
 
-        // Draw projectile
-        val projectile =
-            trajectoryPoints[lastIndex]
-
-        val projectileX =
-            leftMargin +
-                    (projectile.x * pixelsPerMeter).toFloat()
-
-        val projectileY =
-            height - bottomMargin -
-                    (projectile.y * pixelsPerMeter).toFloat()
+        // Draw the current projectile position.
+        val projectile = trajectoryPoints[lastIndex]
 
         canvas.drawCircle(
-            projectileX,
-            projectileY,
-            14f,
+            screenX(projectile.x),
+            screenY(projectile.y),
+            dp(6f),
             pointPaint
         )
+
+        // Draw the graph title.
+        canvas.drawText(
+            "Projectile Trajectory",
+            width / 2f,
+            dp(35f),
+            titlePaint
+        )
+
+        // Draw the horizontal-axis label.
+        textPaint.textAlign = Paint.Align.CENTER
+
+        canvas.drawText(
+            "Horizontal Distance x (m)",
+            leftMargin + graphWidth / 2f,
+            height - dp(50f),
+            textPaint
+        )
+
+        // Draw the vertical-axis label.
+        canvas.save()
+
+        val labelX = dp(16f)
+        val labelY = topMargin + graphHeight / 2f
+
+        canvas.rotate(-90f, labelX, labelY)
+
+        textPaint.textAlign = Paint.Align.CENTER
+
+        canvas.drawText(
+            "Height y (m)",
+            labelX,
+            labelY,
+            textPaint
+        )
+
+        canvas.restore()
     }
 
     fun startAnimation() {
+        if (trajectoryPoints.isEmpty()) return
 
-        if (trajectoryPoints.isEmpty()) {
-            return
-        }
-
+        // Cancel any previous animation and start from the beginning.
         animator?.cancel()
+        animator = null
+
+        currentPointIndex = 0
+        invalidate()
+
+        if (trajectoryPoints.size == 1) return
 
         animator = ValueAnimator.ofInt(
-            currentPointIndex,
-            trajectoryPoints.size - 1
+            0,
+            trajectoryPoints.lastIndex
         ).apply {
-
-            // Animation duration
+            // Set the total animation duration.
             duration = 5000L
 
             interpolator = LinearInterpolator()
 
             addUpdateListener { animation ->
-
-                currentPointIndex =
-                    animation.animatedValue as Int
-
+                currentPointIndex = animation.animatedValue as Int
                 invalidate()
             }
 
@@ -243,35 +302,46 @@ class TrajectoryAnimationView @JvmOverloads constructor(
         }
     }
 
-    fun pauseAnimation() {
-        animator?.pause()
-    }
-
     fun restartAnimation() {
-
-        animator?.cancel()
-
-        currentPointIndex = 0
-
-        invalidate()
-
+        // Restart the animation from the initial position.
         startAnimation()
     }
 
-    fun isRunning(): Boolean {
-        return animator?.isRunning == true
+    fun stopAnimation() {
+        // Cancel the animation without leaving it running in the background.
+        animator?.cancel()
+        animator = null
+
+        currentPointIndex = 0
+        invalidate()
     }
 
-    private fun calculateLabelStep(maxValue: Float): Int {
-        return when {
-            maxValue <= 10 -> 1
-            maxValue <= 20 -> 2
-            maxValue <= 50 -> 5
-            maxValue <= 100 -> 10
-            maxValue <= 200 -> 20
-            maxValue <= 500 -> 50
-            maxValue <= 1000 -> 100
-            else -> 200
+    // Choose a convenient interval for the grid.
+    private fun calculateStep(maxValue: Double): Double {
+        val rawStep = maxValue / 6.0
+        val magnitude = 10.0.pow(floor(log10(rawStep)))
+        val normalized = rawStep / magnitude
+
+        val niceStep = when {
+            normalized <= 1.0 -> 1.0
+            normalized <= 2.0 -> 2.0
+            normalized <= 5.0 -> 5.0
+            else -> 10.0
+        }
+
+        return niceStep * magnitude
+    }
+
+    // Format axis numbers without unnecessary decimal places.
+    private fun formatAxisNumber(value: Double): String {
+        return if (value == value.toLong().toDouble()) {
+            value.toLong().toString()
+        } else {
+            String.format(
+                Locale.US,
+                "%.1f",
+                value
+            ).trimEnd('0').trimEnd('.')
         }
     }
 }

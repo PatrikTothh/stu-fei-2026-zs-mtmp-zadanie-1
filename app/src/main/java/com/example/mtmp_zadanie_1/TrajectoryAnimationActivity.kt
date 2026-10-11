@@ -20,21 +20,26 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_trajectory_animation)
 
+        // Apply system bar insets to the main layout.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
             view.setPadding(
                 systemBars.left,
                 systemBars.top,
                 systemBars.right,
                 systemBars.bottom
             )
+
             insets
         }
 
+        // Initialize the animation view and buttons.
         animationView = findViewById(R.id.animationView)
         buttonPlay = findViewById(R.id.buttonPlay)
         buttonRestart = findViewById(R.id.buttonRestart)
 
+        // Retrieve trajectory data from the intent.
         val points: ArrayList<TrajectoryPointParcel>? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableArrayListExtra(
@@ -46,38 +51,38 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
                 intent.getParcelableArrayListExtra("trajectory_data")
             }
 
+        // Stop if no trajectory data is available.
         if (points.isNullOrEmpty()) {
             Toast.makeText(
                 this,
                 "No trajectory data found.",
                 Toast.LENGTH_SHORT
             ).show()
+
             finish()
             return
         }
 
         animationView.setTrajectory(points)
 
+        // Start the animation from the beginning.
+        buttonPlay.text = "Play"
+
         buttonPlay.setOnClickListener {
-            if (animationView.isRunning()) {
-                animationView.pauseAnimation()
-                buttonPlay.text = "Play"
-            } else {
-                animationView.startAnimation()
-                buttonPlay.text = "Pause"
-            }
+            animationView.startAnimation()
         }
 
+        // Reset and immediately replay the animation.
         buttonRestart.setOnClickListener {
             animationView.restartAnimation()
-            buttonPlay.text = "Pause"
         }
     }
 
     override fun onPause() {
         if (::animationView.isInitialized) {
-            animationView.pauseAnimation()
+            animationView.stopAnimation()
         }
+
         super.onPause()
     }
 }
