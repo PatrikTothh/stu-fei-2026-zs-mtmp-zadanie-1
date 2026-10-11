@@ -51,12 +51,6 @@ class CalculateTrajectory : AppCompatActivity() {
         requestLocalNetworkPermission()
 
         buttonCalculate.setOnClickListener {
-            Toast.makeText(
-                this,
-                "Calculate button works",
-                Toast.LENGTH_SHORT
-            ).show()
-
             calculateFromServer()
         }
 
