@@ -76,21 +76,17 @@ def calculate_trajectory():
 
     time_step = 0.1
 
-    trajectory_points = []
-
-    current_time = 0.0
-
-    trajectory_points.append({
+    trajectory_points = [{
         "time": 0.0,
         "x": 0.0,
         "y": 0.0
-    })
+    }]
 
-    while current_time < time_of_flight:
-        current_time += time_step
+    # Generate intermediate points before the landing time.
+    step = 1
 
-        if current_time > time_of_flight:
-            current_time = time_of_flight
+    while step * time_step < time_of_flight:
+        current_time = step * time_step
 
         x = (
             initial_velocity
@@ -105,12 +101,32 @@ def calculate_trajectory():
             - 0.5 * gravity * current_time ** 2
         )
 
-        if y >= 0:
-            trajectory_points.append({
-                "time": current_time,
-                "x": x,
-                "y": y
-            })
+        trajectory_points.append({
+            "time": current_time,
+            "x": x,
+            "y": max(0.0, y)
+        })
+
+        step += 1
+
+    # Calculate the landing point explicitly.
+    landing_time = time_of_flight
+
+    landing_x = (
+        initial_velocity
+        * math.cos(angle_radians)
+        * landing_time
+    )
+
+    trajectory_points.append({
+        "time": landing_time,
+        "x": landing_x,
+        "y": 0.0
+    })
+
+    # Log the final result for verification.
+    print(">>> Number of points:", len(trajectory_points))
+    print(">>> Final point:", trajectory_points[-1])
 
     return jsonify({
         "success": True,
