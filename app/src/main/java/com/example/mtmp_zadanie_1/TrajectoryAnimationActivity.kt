@@ -1,13 +1,13 @@
 package com.example.mtmp_zadanie_1
 
-import androidx.activity.enableEdgeToEdge
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class TrajectoryAnimationActivity : AppCompatActivity() {
 
@@ -20,19 +20,14 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_trajectory_animation)
 
-        val main = findViewById<android.view.View>(R.id.main)
-
-        ViewCompat.setOnApplyWindowInsetsListener(main) { view, insets ->
-            val systemBars =
-                insets.getInsets(WindowInsetsCompat.Type.systemBars())
-
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(
                 systemBars.left,
                 systemBars.top,
                 systemBars.right,
                 systemBars.bottom
             )
-
             insets
         }
 
@@ -40,7 +35,7 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
         buttonPlay = findViewById(R.id.buttonPlay)
         buttonRestart = findViewById(R.id.buttonRestart)
 
-        val trajectoryPoints: ArrayList<TrajectoryPointParcel>? =
+        val points: ArrayList<TrajectoryPointParcel>? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableArrayListExtra(
                     "trajectory_data",
@@ -51,7 +46,7 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
                 intent.getParcelableArrayListExtra("trajectory_data")
             }
 
-        if (trajectoryPoints == null || trajectoryPoints.isEmpty()) {
+        if (points.isNullOrEmpty()) {
             Toast.makeText(
                 this,
                 "No trajectory data found.",
@@ -61,7 +56,7 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
             return
         }
 
-        animationView.setTrajectory(trajectoryPoints)
+        animationView.setTrajectory(points)
 
         buttonPlay.setOnClickListener {
             if (animationView.isRunning()) {
@@ -80,7 +75,9 @@ class TrajectoryAnimationActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        if (::animationView.isInitialized) {
+            animationView.pauseAnimation()
+        }
         super.onPause()
-        animationView.pauseAnimation()
     }
 }

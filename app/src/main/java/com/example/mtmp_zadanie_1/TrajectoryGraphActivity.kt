@@ -2,6 +2,7 @@ package com.example.mtmp_zadanie_1
 
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class TrajectoryGraphActivity : AppCompatActivity() {
@@ -9,7 +10,7 @@ class TrajectoryGraphActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val trajectoryPoints: ArrayList<TrajectoryPointParcel>? =
+        val points: ArrayList<TrajectoryPointParcel>? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableArrayListExtra(
                     "trajectory_data",
@@ -20,13 +21,17 @@ class TrajectoryGraphActivity : AppCompatActivity() {
                 intent.getParcelableArrayListExtra("trajectory_data")
             }
 
-        val graphView = TrajectoryGraphView(
-            this,
-            trajectoryPoints ?: arrayListOf()
-        )
+        if (points.isNullOrEmpty()) {
+            Toast.makeText(
+                this,
+                "No trajectory data found.",
+                Toast.LENGTH_SHORT
+            ).show()
+            finish()
+            return
+        }
 
-        setContentView(graphView)
-
+        setContentView(TrajectoryGraphView(this, points))
         supportActionBar?.title = "Trajectory Graph"
     }
 }
