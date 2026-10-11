@@ -5,7 +5,9 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#F7F9F7"
+    android:padding="24dp">
 
     <com.example.mtmp_zadanie_1.TrajectoryAnimationView
         android:id="@+id/animationView"
@@ -18,20 +20,29 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="16dp">
+        android:paddingTop="20dp">
 
         <Button
             android:id="@+id/buttonPlay"
-            android:layout_width="150dp"
-            android:layout_height="60dp"
-            android:text="Play" />
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Play"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#218653" />
 
         <Button
             android:id="@+id/buttonRestart"
-            android:layout_width="150dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="20dp"
-            android:text="Restart" />
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Restart"
+            android:textAllCaps="false"
+            android:textColor="#216641"
+            android:backgroundTint="#E1F1E6" />
 
     </LinearLayout>
 

@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F7F9F7"
     android:fillViewport="true"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    tools:context=".CalculateTrajectory">
+    android:padding="24dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="40dp"
-        android:paddingBottom="32dp">
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp">
 
-        <!-- Header -->
         <TextView
             android:id="@+id/titleTrajectory"
             android:layout_width="0dp"
@@ -26,12 +23,10 @@
             android:textColor="#183326"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:fontFamily="sans"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Input section -->
         <TextView
             android:id="@+id/inputSectionTitle"
             android:layout_width="wrap_content"
@@ -41,9 +36,8 @@
             android:textColor="#78877D"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:letterSpacing="0.08"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/titleTrajectory" />
+            app:layout_constraintTop_toBottomOf="@id/titleTrajectory"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <EditText
             android:id="@+id/editTextInitialVelocity"
@@ -51,18 +45,15 @@
             android:layout_height="58dp"
             android:layout_marginTop="14dp"
             android:background="#FFFFFF"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingHorizontal="16dp"
             android:hint="Initial velocity (m/s)"
             android:inputType="numberDecimal|numberSigned"
             android:singleLine="true"
             android:textColor="#183326"
             android:textColorHint="#929E95"
-            android:textSize="16sp"
-            android:elevation="1dp"
+            app:layout_constraintTop_toBottomOf="@id/inputSectionTitle"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/inputSectionTitle" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <EditText
             android:id="@+id/editTextAngle"
@@ -70,20 +61,16 @@
             android:layout_height="58dp"
             android:layout_marginTop="14dp"
             android:background="#FFFFFF"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingHorizontal="16dp"
             android:hint="Angle (degrees)"
             android:inputType="numberDecimal|numberSigned"
             android:singleLine="true"
             android:textColor="#183326"
             android:textColorHint="#929E95"
-            android:textSize="16sp"
-            android:elevation="1dp"
+            app:layout_constraintTop_toBottomOf="@id/editTextInitialVelocity"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/editTextInitialVelocity" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Primary green button -->
         <Button
             android:id="@+id/buttonCalculate"
             android:layout_width="0dp"
@@ -91,19 +78,14 @@
             android:layout_marginTop="28dp"
             android:text="Calculate Trajectory"
             android:textAllCaps="false"
-            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
             android:backgroundTint="#218653"
-            android:minHeight="0dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
             app:cornerRadius="14dp"
+            app:layout_constraintTop_toBottomOf="@id/editTextAngle"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/editTextAngle" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Results section -->
         <TextView
             android:id="@+id/resultsSectionTitle"
             android:layout_width="wrap_content"
@@ -113,9 +95,8 @@
             android:textColor="#78877D"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:letterSpacing="0.08"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/buttonCalculate" />
+            app:layout_constraintTop_toBottomOf="@id/buttonCalculate"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/buttonList"
@@ -124,16 +105,12 @@
             android:layout_marginTop="14dp"
             android:text="List Data"
             android:textAllCaps="false"
-            android:textSize="15sp"
             android:textColor="#216641"
             android:backgroundTint="#E1F1E6"
-            android:minHeight="0dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
             app:cornerRadius="12dp"
+            app:layout_constraintTop_toBottomOf="@id/resultsSectionTitle"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/resultsSectionTitle" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <Button
             android:id="@+id/buttonGraph"
@@ -142,16 +119,12 @@
             android:layout_marginTop="12dp"
             android:text="Show Graph"
             android:textAllCaps="false"
-            android:textSize="15sp"
             android:textColor="#216641"
             android:backgroundTint="#E1F1E6"
-            android:minHeight="0dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
             app:cornerRadius="12dp"
+            app:layout_constraintTop_toBottomOf="@id/buttonList"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/buttonList" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <Button
             android:id="@+id/buttonAnimation"
@@ -160,16 +133,12 @@
             android:layout_marginTop="12dp"
             android:text="Show Animation"
             android:textAllCaps="false"
-            android:textSize="15sp"
             android:textColor="#216641"
             android:backgroundTint="#E1F1E6"
-            android:minHeight="0dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
             app:cornerRadius="12dp"
+            app:layout_constraintTop_toBottomOf="@id/buttonGraph"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/buttonGraph" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
